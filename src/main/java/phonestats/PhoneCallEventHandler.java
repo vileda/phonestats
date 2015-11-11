@@ -14,9 +14,14 @@ public class PhoneCallEventHandler implements Handler<RoutingContext> {
 
 	@Override
 	public void handle(RoutingContext routingContext) {
+		CreateCallCommand call = parseCallEvent(routingContext);
+		PhonestatsVerticle.publishCommand(call, eventStore, routingContext, String.class);
+	}
+
+	private CreateCallCommand parseCallEvent(RoutingContext routingContext) {
 		CreateCallCommand call = new CreateCallCommand();
 		String callId = routingContext.request().getParam("callId");
 		call.setCallId(callId);
-		PhonestatsVerticle.publishCommand(call, eventStore, routingContext, String.class);
+		return call;
 	}
 }
