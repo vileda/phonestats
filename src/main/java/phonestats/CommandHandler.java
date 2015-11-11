@@ -16,9 +16,9 @@ public class CommandHandler {
 	private void attachCommandHandlers() {
 		eventStore.consumer(CreateCallCommand.class, message -> {
 			CreateCallCommand createCommand = Json.decodeValue(message.body(), CreateCallCommand.class);
-			CallCreatedEvent createdEvent = new CallCreatedEvent(createCommand.getCallId());
+			CallCreatedEvent createdEvent = new CallCreatedEvent(createCommand.getId(), createCommand.getCallId());
 			eventStore.publish(createdEvent, CallCreatedEvent.class);
-			message.reply(createCommand.getCallId());
+			message.reply(createCommand.getId());
 		});
 	}
 }

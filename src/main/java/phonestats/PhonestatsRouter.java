@@ -14,7 +14,7 @@ import io.vertx.rxjava.ext.web.handler.BodyHandler;
 import io.vertx.rxjava.ext.web.handler.StaticHandler;
 import rx.Observable;
 
-public class PhonestatsVerticle extends AbstractVerticle {
+public class PhonestatsRouter extends AbstractVerticle {
 	public void start() {
 		EventBus eventBus = vertx.eventBus();
 		EventStore eventStore = new MongoEventStore(vertx, eventBus);
@@ -24,7 +24,6 @@ public class PhonestatsVerticle extends AbstractVerticle {
 		Router router = Router.router(vertx);
 		Router apiRouter = Router.router(vertx);
 
-		router.mountSubRouter("/api", apiRouter);
 
 		router.route().handler(BodyHandler.create());
 
@@ -32,7 +31,9 @@ public class PhonestatsVerticle extends AbstractVerticle {
 
 		new CommandHandler(eventStore);
 		apiRouter.get("/aggregate/dashboard/:id").handler(new DashboardAggregateHandler(eventStore));
-		apiRouter.post("/event").handler(new PhoneCallEventHandler(eventStore));
+		apiRouter.post("/event/:id").handler(new PhoneCallEventHandler(eventStore));
+
+		router.mountSubRouter("/api", apiRouter);
 
 		server.requestHandler(router::accept).listen(8080);
 	}

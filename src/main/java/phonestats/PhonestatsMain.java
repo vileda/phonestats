@@ -8,6 +8,6 @@ public class PhonestatsMain {
 	}
 
 	public void run(Vertx vertx) {
-		vertx.deployVerticle("phonestats.PhonestatsVerticle");
+		vertx.deployVerticle("phonestats.PhonestatsRouter");
 	}
 }
