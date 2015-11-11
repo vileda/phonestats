@@ -17,6 +17,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -30,22 +31,38 @@ public class PhoneCallEventHandlerTest {
 
 	@Test
 	public void testPostCallEvent() throws Exception {
-		List<NameValuePair> parameters = new ArrayList<>();
-		parameters.add(new BasicNameValuePair("callId", "9820948236253789239"));
-		HttpResponse execute = post("/api/event/testId", parameters);
+		String callId = "9820948236253789239";
+		String userId = "testId";
+		HttpResponse execute = postCallEvent(callId, userId);
+		assertPostCallEvent(execute, userId);
+	}
+
+	private void assertPostCallEvent(HttpResponse execute, String userId) throws IOException {
 		assertThat(execute.getStatusLine().getStatusCode(), is(200));
 		assertThat(IOUtils.toString(execute.getEntity().getContent()),
-				CoreMatchers.containsString("testId"));
+				CoreMatchers.containsString(userId));
+	}
+
+	private HttpResponse postCallEvent(String callId, String userId) throws IOException {
+		List<NameValuePair> parameters = new ArrayList<>();
+		parameters.add(new BasicNameValuePair("callId", callId));
+		return post("/api/event/" + userId, parameters);
 	}
 
 	@Test
 	public void testGetDashboardAggregate() throws Exception {
-		HttpResponse execute = get("/api/aggregate/dashboard/testId");
+		String userId = UUID.randomUUID().toString();
+
+		for (int i = 0; i < 100; i++) {
+			String callId = UUID.randomUUID().toString();
+			postCallEvent(callId, userId);
+		}
+
+		HttpResponse execute = get("/api/aggregate/dashboard/" + userId);
 		assertThat(execute.getStatusLine().getStatusCode(), is(200));
 		String actual = IOUtils.toString(execute.getEntity().getContent());
-		assertThat(actual, CoreMatchers.containsString("testId"));
-		assertThat(actual, CoreMatchers.containsString("incomingTotal"));
-		System.out.println(actual);
+		assertThat(actual, CoreMatchers.containsString(userId));
+		assertThat(actual, CoreMatchers.containsString("incomingTotal\":100"));
 	}
 
 	private HttpResponse post(String path, List<NameValuePair> params) throws IOException {
@@ -59,7 +76,6 @@ public class PhoneCallEventHandlerTest {
 		HttpClient httpclient = HttpClientBuilder.create().build();
 		String uri = "http://localhost:8080" + path;
 		HttpGet httpGet = new HttpGet(uri);
-		System.out.println("HTTP fetching " + uri);
 		return httpclient.execute(httpGet);
 	}
 }
