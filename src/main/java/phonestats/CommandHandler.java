@@ -21,9 +21,9 @@ public class CommandHandler {
 			CreateCallCommand createCommand = Json.decodeValue(message.body(), CreateCallCommand.class);
 			CallCreatedEvent createdEvent = new CallCreatedEvent(createCommand.getId(), createCommand.getCallId());
 			eventStore.publish(createdEvent, CallCreatedEvent.class).subscribe(event -> {
-				eventStore.load(event.getId(), Dashboard.class)
+				eventStore.load(event.getId(), Dashboard.class, createdEvent)
 						.subscribe(dashboard -> eventStore
-								.publish(UPDATE_DASHBOARD_EVENT_ADDRESS, dashboard, createdEvent));
+								.publish(UPDATE_DASHBOARD_EVENT_ADDRESS, dashboard));
 			});
 			message.reply(createCommand.getId());
 		});
