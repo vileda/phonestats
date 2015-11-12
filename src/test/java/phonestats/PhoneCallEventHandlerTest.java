@@ -25,7 +25,7 @@ import static org.junit.Assert.assertThat;
 public class PhoneCallEventHandlerTest {
 	@BeforeClass
 	public static void beforeClass() throws InterruptedException {
-		//new PhonestatsMain().run(Vertx.vertx());
+		new PhonestatsMain().run(Vertx.vertx());
 		Thread.sleep(1000);
 	}
 
