@@ -1,6 +1,7 @@
 package phonestats;
 
 import io.resx.core.EventStore;
+import io.resx.core.InMemoryEventStore;
 import io.resx.core.MongoEventStore;
 import io.resx.core.command.Command;
 import io.vertx.core.json.Json;
@@ -23,10 +24,11 @@ import rx.Observable;
 public class PhonestatsRouter extends AbstractVerticle {
 	public void start() {
 		EventBus eventBus = vertx.eventBus();
-		EventStore eventStore = new MongoEventStore(vertx, eventBus);
+		EventStore eventStore = new InMemoryEventStore(eventBus);
 
 		SessionStore sessionStore = LocalSessionStore.create(vertx);
 		SessionHandler sessionHandler = SessionHandler.create(sessionStore);
+		sessionHandler.setNagHttps(false);
 
 		HttpServer server = vertx.createHttpServer();
 
