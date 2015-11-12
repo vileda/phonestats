@@ -29,7 +29,7 @@ public class PhonestatsRouter extends AbstractVerticle {
 	public void start() {
 		EventBus eventBus = vertx.eventBus();
 		//EventStore eventStore = new InMemoryEventStore(eventBus);
-		EventStore eventStore = new MongoEventStore(vertx, eventBus);
+		MongoEventStore eventStore = new MongoEventStore(vertx, eventBus);
 
 		SessionStore sessionStore = LocalSessionStore.create(vertx);
 		SessionHandler sessionHandler = SessionHandler.create(sessionStore);

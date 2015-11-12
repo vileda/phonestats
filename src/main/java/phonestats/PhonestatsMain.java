@@ -9,6 +9,6 @@ public class PhonestatsMain {
 	}
 
 	public void run(Vertx vertx) {
-		vertx.deployVerticle("phonestats.PhonestatsRouter", new DeploymentOptions().setInstances(1));
+		vertx.deployVerticle("phonestats.PhonestatsRouter");
 	}
 }
