@@ -1,7 +1,6 @@
 package phonestats;
 
 import io.resx.core.EventStore;
-import io.resx.core.InMemoryEventStore;
 import io.resx.core.MongoEventStore;
 import io.resx.core.command.Command;
 import io.vertx.core.json.Json;

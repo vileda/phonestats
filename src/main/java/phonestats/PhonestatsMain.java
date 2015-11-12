@@ -1,6 +1,5 @@
 package phonestats;
 
-import io.vertx.core.DeploymentOptions;
 import io.vertx.rxjava.core.Vertx;
 
 public class PhonestatsMain {

@@ -5,8 +5,6 @@ import io.vertx.core.Handler;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import phonestats.command.CreateCallCommand;
 
-import java.util.UUID;
-
 public class PhoneCallEventHandler implements Handler<RoutingContext> {
 	private final EventStore eventStore;
 
