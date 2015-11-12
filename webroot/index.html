@@ -6,24 +6,25 @@
 </head>
 <body>
 <h1>phonestats</h1>
-
+<h3 id="incomingTotal">0</h3>
 <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="//cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>
 <script>
-    var sock = new SockJS(window.location.href+'socket');
+    $(function () {
+        var sock = new SockJS(window.location.href+'socket');
 
-    sock.onopen = function() {
-        console.log('open');
-    };
+        sock.onopen = function() {
+            console.log('open');
+        };
 
-    sock.onmessage = function(e) {
-        console.log('message', e.data);
-    };
+        sock.onmessage = function(e) {
+            $('#incomingTotal').text(JSON.parse(e.data).incomingTotal);
+        };
 
-    sock.onclose = function() {
-        console.log('close');
-    };
-
+        sock.onclose = function() {
+            console.log('close');
+        };
+    });
 </script>
 </body>
 </html>
