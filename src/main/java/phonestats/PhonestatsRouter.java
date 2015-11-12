@@ -4,8 +4,6 @@ import io.resx.core.EventStore;
 import io.resx.core.MongoEventStore;
 import io.resx.core.command.Command;
 import io.vertx.core.json.Json;
-import io.vertx.ext.web.handler.sockjs.BridgeOptions;
-import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.eventbus.EventBus;
@@ -14,36 +12,39 @@ import io.vertx.rxjava.core.http.HttpServerResponse;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import io.vertx.rxjava.ext.web.handler.BodyHandler;
+import io.vertx.rxjava.ext.web.handler.CookieHandler;
+import io.vertx.rxjava.ext.web.handler.SessionHandler;
 import io.vertx.rxjava.ext.web.handler.StaticHandler;
 import io.vertx.rxjava.ext.web.handler.sockjs.SockJSHandler;
-import phonestats.event.CallCreatedEvent;
+import io.vertx.rxjava.ext.web.sstore.LocalSessionStore;
+import io.vertx.rxjava.ext.web.sstore.SessionStore;
 import rx.Observable;
-
-import static phonestats.Constants.*;
 
 public class PhonestatsRouter extends AbstractVerticle {
 	public void start() {
 		EventBus eventBus = vertx.eventBus();
 		EventStore eventStore = new MongoEventStore(vertx, eventBus);
 
+		SessionStore sessionStore = LocalSessionStore.create(vertx);
+		SessionHandler sessionHandler = SessionHandler.create(sessionStore);
+
 		HttpServer server = vertx.createHttpServer();
 
 		Router router = Router.router(vertx);
 		Router apiRouter = Router.router(vertx);
 
+		router.route().handler(BodyHandler.create());
+		router.route().handler(CookieHandler.create());
+		router.route().handler(sessionHandler);
+
 		SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
 
 		SockJSHandler sockJSHandler = SockJSHandler.create(vertx, options);
-		BridgeOptions bridgeOptions = new BridgeOptions();
-		bridgeOptions
-				.addOutboundPermitted(new PermittedOptions().setAddress(CALL_CREATED_EVENT_ADDRESS));
-		sockJSHandler.bridge(bridgeOptions);
 
 		sockJSHandler.socketHandler(new WebsocketHandler(eventStore));
 
-		router.route("/socket/*").handler(sockJSHandler);
+		router.route("/socket*").handler(sockJSHandler);
 
-		router.route().handler(BodyHandler.create());
 
 		StaticHandler staticHandler = StaticHandler.create();
 		router.get().pathRegex("^(/|/js/.*)").handler(staticHandler);
