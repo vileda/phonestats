@@ -11,7 +11,9 @@
 <script src="//cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>
 <script>
     $(function () {
-        var sock = new SockJS(window.location.href+'socket');
+        var wsPort = window.location.port === '' ? '' : ':' + window.location.port;
+        var wsUrl = window.location.protocol + '//' + window.location.hostname + wsPort;
+        var sock = new SockJS(wsUrl+'/socket');
 
         sock.onopen = function() {
             console.log('open');
@@ -24,6 +26,12 @@
         sock.onclose = function() {
             console.log('close');
         };
+
+        var id = window.location.pathname.split('/');
+        $.getJSON('/api/aggregate/dashboard/' + id[id.length - 1])
+                .done(function(aggregate) {
+                    $('#incomingTotal').text(aggregate.incomingTotal);
+                });
     });
 </script>
 </body>

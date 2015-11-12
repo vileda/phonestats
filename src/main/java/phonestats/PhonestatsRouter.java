@@ -41,13 +41,19 @@ public class PhonestatsRouter extends AbstractVerticle {
 
 		SockJSHandler sockJSHandler = SockJSHandler.create(vertx, options);
 
-		sockJSHandler.socketHandler(new WebsocketHandler(eventStore));
+		final WebsocketHandler websocketHandler = new WebsocketHandler(eventStore);
+		sockJSHandler.socketHandler(websocketHandler);
 
 		router.route("/socket*").handler(sockJSHandler);
 
+		router.get("/io/:id").handler(routingContext -> {
+			routingContext.session().put("id", routingContext.request().getParam("id"));
+			routingContext.response().sendFile("webroot/index.html");
+		});
 
 		StaticHandler staticHandler = StaticHandler.create();
 		router.get().pathRegex("^(/|/js/.*)").handler(staticHandler);
+
 
 		new CommandHandler(eventStore);
 		apiRouter.get("/aggregate/dashboard/:id").handler(new DashboardAggregateHandler(eventStore));
