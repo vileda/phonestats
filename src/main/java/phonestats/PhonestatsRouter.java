@@ -8,6 +8,7 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.eventbus.EventBus;
+import io.vertx.rxjava.core.eventbus.MessageConsumer;
 import io.vertx.rxjava.core.http.HttpServer;
 import io.vertx.rxjava.core.http.HttpServerResponse;
 import io.vertx.rxjava.ext.web.Router;
@@ -21,10 +22,14 @@ import io.vertx.rxjava.ext.web.sstore.LocalSessionStore;
 import io.vertx.rxjava.ext.web.sstore.SessionStore;
 import rx.Observable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PhonestatsRouter extends AbstractVerticle {
 	public void start() {
 		EventBus eventBus = vertx.eventBus();
-		EventStore eventStore = new InMemoryEventStore(eventBus);
+		//EventStore eventStore = new InMemoryEventStore(eventBus);
+		EventStore eventStore = new MongoEventStore(vertx, eventBus);
 
 		SessionStore sessionStore = LocalSessionStore.create(vertx);
 		SessionHandler sessionHandler = SessionHandler.create(sessionStore);
@@ -43,7 +48,8 @@ public class PhonestatsRouter extends AbstractVerticle {
 
 		SockJSHandler sockJSHandler = SockJSHandler.create(vertx, options);
 
-		final WebsocketHandler websocketHandler = new WebsocketHandler(eventStore);
+		final Map<String, MessageConsumer<String>> consumers = new HashMap<>();
+		final WebsocketHandler websocketHandler = new WebsocketHandler(eventStore, consumers);
 		sockJSHandler.socketHandler(websocketHandler);
 
 		router.route("/socket*").handler(sockJSHandler);
