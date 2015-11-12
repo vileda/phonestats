@@ -53,7 +53,7 @@ public class PhoneCallEventHandlerTest {
 	public void testGetDashboardAggregate() throws Exception {
 		String userId = UUID.randomUUID().toString();
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10; i++) {
 			String callId = UUID.randomUUID().toString();
 			postCallEvent(callId, userId);
 		}
@@ -62,7 +62,7 @@ public class PhoneCallEventHandlerTest {
 		assertThat(execute.getStatusLine().getStatusCode(), is(200));
 		String actual = IOUtils.toString(execute.getEntity().getContent());
 		assertThat(actual, CoreMatchers.containsString(userId));
-		assertThat(actual, CoreMatchers.containsString("incomingTotal\":100"));
+		assertThat(actual, CoreMatchers.containsString("incomingTotal\":10"));
 	}
 
 	private HttpResponse post(String path, List<NameValuePair> params) throws IOException {
