@@ -59,7 +59,7 @@ public class PhonestatsRouter extends AbstractVerticle {
 		});
 
 		StaticHandler staticHandler = StaticHandler.create();
-		router.get().pathRegex("^(/|/js/.*)").handler(staticHandler);
+		router.get().pathRegex("^(/|/(js|css)/.*)").handler(staticHandler);
 
 
 		new CommandHandler(eventStore);
