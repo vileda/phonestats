@@ -7,6 +7,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import phonestats.aggregate.Dashboard;
 
+import static phonestats.Constants.getTodaysEventsQueryFor;
+
 public class DashboardAggregateHandler implements Handler<RoutingContext> {
 	private final MongoEventStore eventStore;
 
@@ -17,9 +19,13 @@ public class DashboardAggregateHandler implements Handler<RoutingContext> {
 	@Override
 	public void handle(RoutingContext routingContext) {
 		String id = routingContext.request().getParam("id");
-		JsonObject query = new JsonObject().put("payload.id", id);
+
+		JsonObject query = getTodaysEventsQueryFor(id);
+
 		eventStore.load(query, Dashboard.class).subscribe(dashboard -> {
-			routingContext.response().end(Json.encode(dashboard));
+			if(dashboard.getId() == null)
+				routingContext.response().setStatusCode(404).end("aggregate not found");
+			else routingContext.response().end(Json.encode(dashboard));
 		});
 	}
 }

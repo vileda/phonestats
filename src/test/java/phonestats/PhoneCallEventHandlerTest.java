@@ -63,11 +63,11 @@ public class PhoneCallEventHandlerTest {
 		}
 
 		HttpResponse execute = get("/api/aggregate/dashboard/" + userId);
-		assertThat(execute.getStatusLine().getStatusCode(), is(200));
 		String actual = IOUtils.toString(execute.getEntity().getContent());
+		assertThat(actual, execute.getStatusLine().getStatusCode(), is(200));
 		final JsonObject jsonObject = new JsonObject(actual);
-		assertThat(jsonObject.getString("id"), is(userId));
-		assertTrue(jsonObject.getInteger("incomingTotal") > 0);
+		assertThat(actual, jsonObject.getString("id"), is(userId));
+		assertTrue(actual, jsonObject.getInteger("incomingTotal") > 0);
 	}
 
 	private HttpResponse post(String path, List<NameValuePair> params) throws IOException {
