@@ -1,14 +1,14 @@
 package phonestats;
 
-import io.resx.core.EventStore;
+import io.resx.core.MongoEventStore;
 import io.vertx.core.Handler;
 import io.vertx.rxjava.ext.web.RoutingContext;
 import phonestats.command.CreateCallCommand;
 
 public class PhoneCallEventHandler implements Handler<RoutingContext> {
-	private final EventStore eventStore;
+	private final MongoEventStore eventStore;
 
-	public PhoneCallEventHandler(EventStore eventStore) {
+	public PhoneCallEventHandler(MongoEventStore eventStore) {
 		this.eventStore = eventStore;
 	}
 

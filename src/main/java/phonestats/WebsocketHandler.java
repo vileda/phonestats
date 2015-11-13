@@ -1,20 +1,22 @@
 package phonestats;
 
-import io.resx.core.EventStore;
+import io.resx.core.MongoEventStore;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.rxjava.core.eventbus.MessageConsumer;
 import io.vertx.rxjava.ext.web.handler.sockjs.SockJSSocket;
+import lombok.extern.java.Log;
 import phonestats.event.UpdateDashboardEvent;
 
 import java.util.Map;
 
+@Log
 public class WebsocketHandler implements Handler<SockJSSocket> {
-	private final EventStore eventStore;
+	private final MongoEventStore eventStore;
 	private final Map<String, MessageConsumer<String>> consumers;
 
-	public WebsocketHandler(EventStore eventStore, Map<String, MessageConsumer<String>> websocketConsumers) {
+	public WebsocketHandler(MongoEventStore eventStore, Map<String, MessageConsumer<String>> websocketConsumers) {
 		this.eventStore = eventStore;
 		this.consumers = websocketConsumers;
 	}
@@ -33,16 +35,16 @@ public class WebsocketHandler implements Handler<SockJSSocket> {
 					sockJSSocket.write(Buffer.buffer(message.body()));
 				}
 			});
-			System.out.println("bound WS handler to sessionId " + sessionId);
+			log.info("bound WS handler to sessionId " + sessionId);
 			consumers.put(sessionId, consumer);
-			System.out.println("registered consumers " + consumers.size());
+			log.info("registered consumers " + consumers.size());
 		}
 
 		sockJSSocket.endHandler(aVoid -> {
 			final MessageConsumer<String> consumer = consumers.get(sessionId);
 			consumer.unregister();
 			consumers.remove(sessionId);
-			System.out.println("unregistered consumer for sessionId " + sessionId);
+			log.info("unregistered consumer for sessionId " + sessionId);
 		});
 	}
 }

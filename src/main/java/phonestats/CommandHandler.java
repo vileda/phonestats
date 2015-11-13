@@ -1,6 +1,6 @@
 package phonestats;
 
-import io.resx.core.EventStore;
+import io.resx.core.MongoEventStore;
 import io.vertx.core.json.Json;
 import phonestats.aggregate.Dashboard;
 import phonestats.command.CreateCallCommand;
@@ -9,9 +9,9 @@ import phonestats.event.CallCreatedEvent;
 import static phonestats.Constants.UPDATE_DASHBOARD_EVENT_ADDRESS;
 
 public class CommandHandler {
-	private EventStore eventStore;
+	private MongoEventStore eventStore;
 
-	public CommandHandler(EventStore eventStore) {
+	public CommandHandler(MongoEventStore eventStore) {
 		this.eventStore = eventStore;
 		attachCommandHandlers();
 	}
