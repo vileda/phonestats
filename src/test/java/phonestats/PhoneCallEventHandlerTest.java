@@ -1,5 +1,6 @@
 package phonestats;
 
+import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Vertx;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -19,8 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class PhoneCallEventHandlerTest {
 	@BeforeClass
@@ -40,7 +44,7 @@ public class PhoneCallEventHandlerTest {
 	private void assertPostCallEvent(HttpResponse execute, String userId) throws IOException {
 		assertThat(execute.getStatusLine().getStatusCode(), is(200));
 		assertThat(IOUtils.toString(execute.getEntity().getContent()),
-				CoreMatchers.containsString(userId));
+				containsString(userId));
 	}
 
 	private HttpResponse postCallEvent(String callId, String userId) throws IOException {
@@ -61,8 +65,9 @@ public class PhoneCallEventHandlerTest {
 		HttpResponse execute = get("/api/aggregate/dashboard/" + userId);
 		assertThat(execute.getStatusLine().getStatusCode(), is(200));
 		String actual = IOUtils.toString(execute.getEntity().getContent());
-		assertThat(actual, CoreMatchers.containsString(userId));
-		assertThat(actual, CoreMatchers.containsString("incomingTotal\":10"));
+		final JsonObject jsonObject = new JsonObject(actual);
+		assertThat(jsonObject.getString("id"), is(userId));
+		assertTrue(jsonObject.getInteger("incomingTotal") > 0);
 	}
 
 	private HttpResponse post(String path, List<NameValuePair> params) throws IOException {
