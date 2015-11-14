@@ -4,6 +4,7 @@ import io.resx.core.EventStore;
 import io.resx.core.MongoEventStore;
 import io.resx.core.command.Command;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.eventbus.EventBus;
@@ -26,26 +27,27 @@ import java.util.Map;
 
 public class PhonestatsRouter extends AbstractVerticle {
 	public void start() {
-		EventBus eventBus = vertx.eventBus();
-		//EventStore eventStore = new InMemoryEventStore(eventBus);
-		MongoEventStore eventStore = new MongoEventStore(vertx, eventBus);
+		final EventBus eventBus = vertx.eventBus();
+		final JsonObject config = new JsonObject()
+				.put("connection_string", "mongodb://172.31.15.146:27017");
+		final MongoEventStore eventStore = new MongoEventStore(vertx, eventBus, config);
 
-		SessionStore sessionStore = LocalSessionStore.create(vertx);
-		SessionHandler sessionHandler = SessionHandler.create(sessionStore);
+		final SessionStore sessionStore = LocalSessionStore.create(vertx);
+		final SessionHandler sessionHandler = SessionHandler.create(sessionStore);
 		sessionHandler.setNagHttps(false);
 
-		HttpServer server = vertx.createHttpServer();
+		final HttpServer server = vertx.createHttpServer();
 
-		Router router = Router.router(vertx);
-		Router apiRouter = Router.router(vertx);
+		final Router router = Router.router(vertx);
+		final Router apiRouter = Router.router(vertx);
 
 		router.route().handler(BodyHandler.create());
 		router.route().handler(CookieHandler.create());
 		router.route().handler(sessionHandler);
 
-		SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
+		final SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
 
-		SockJSHandler sockJSHandler = SockJSHandler.create(vertx, options);
+		final SockJSHandler sockJSHandler = SockJSHandler.create(vertx, options);
 
 		final Map<String, MessageConsumer<String>> consumers = new HashMap<>();
 		final WebsocketHandler websocketHandler = new WebsocketHandler(eventStore, consumers);
@@ -58,9 +60,8 @@ public class PhonestatsRouter extends AbstractVerticle {
 			routingContext.response().sendFile("webroot/index.html");
 		});
 
-		StaticHandler staticHandler = StaticHandler.create();
+		final StaticHandler staticHandler = StaticHandler.create();
 		router.get().pathRegex("^(/|/(js|css)/.*)").handler(staticHandler);
-
 
 		new CommandHandler(eventStore);
 		apiRouter.get("/aggregate/dashboard/:id").handler(new DashboardAggregateHandler(eventStore));
@@ -71,8 +72,8 @@ public class PhonestatsRouter extends AbstractVerticle {
 		server.requestHandler(router::accept).listen(8080);
 	}
 
-	public static <T extends Command, R> void publishCommand(T payload, EventStore eventStore, RoutingContext routingContext, Class<R> clazz) {
-		HttpServerResponse response = routingContext.response();
+	public static <T extends Command, R> void publishCommand(final T payload, final EventStore eventStore, final RoutingContext routingContext, final Class<R> clazz) {
+		final HttpServerResponse response = routingContext.response();
 
 		eventStore.publish(payload, clazz)
 				.onErrorResumeNext(message -> {
