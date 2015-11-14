@@ -21,13 +21,14 @@ public class CommandHandler {
 		eventStore.consumer(CreateCallCommand.class, message -> {
 			CreateCallCommand createCommand = Json.decodeValue(message.body(), CreateCallCommand.class);
 			CallCreatedEvent createdEvent = new CallCreatedEvent(createCommand.getId(), createCommand.getCallId());
-			eventStore.publish(createdEvent, CallCreatedEvent.class).subscribe(event -> {
-				String id = event.getId();
-				eventStore.load(getTodaysEventsQueryFor(id), Dashboard.class, createdEvent)
-						.subscribe(dashboard -> eventStore
-								.publish(UPDATE_DASHBOARD_EVENT_ADDRESS, dashboard, getTodaysEventsQueryFor(id).encode()));
-			});
-			message.reply(createCommand.getId());
+			eventStore.publish(createdEvent, CallCreatedEvent.class)
+					.subscribe(event -> {
+						String id = event.getId();
+						eventStore.load(getTodaysEventsQueryFor(id), Dashboard.class, createdEvent)
+								.subscribe(dashboard -> eventStore
+										.publish(UPDATE_DASHBOARD_EVENT_ADDRESS, dashboard, getTodaysEventsQueryFor(id).encode())
+										.subscribe(dashboard1 -> message.reply(createCommand.getId())));
+					});
 		});
 	}
 }
