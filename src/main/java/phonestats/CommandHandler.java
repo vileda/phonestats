@@ -5,8 +5,8 @@ import io.vertx.core.json.Json;
 import phonestats.aggregate.Dashboard;
 import phonestats.command.CreateCallCommand;
 import phonestats.event.CallCreatedEvent;
+import phonestats.event.UpdateDashboardEvent;
 
-import static phonestats.Constants.UPDATE_DASHBOARD_EVENT_ADDRESS;
 import static phonestats.Constants.getTodaysEventsQueryFor;
 
 public class CommandHandler {
@@ -26,7 +26,7 @@ public class CommandHandler {
 						String id = event.getId();
 						eventStore.load(getTodaysEventsQueryFor(id), Dashboard.class, createdEvent)
 								.subscribe(dashboard -> eventStore
-										.publish(UPDATE_DASHBOARD_EVENT_ADDRESS, dashboard, getTodaysEventsQueryFor(id).encode())
+										.publish(new UpdateDashboardEvent(), dashboard, getTodaysEventsQueryFor(id).encode())
 										.subscribe(dashboard1 -> message.reply(createCommand.getId())));
 					});
 		});
