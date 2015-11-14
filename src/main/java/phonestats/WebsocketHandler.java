@@ -7,11 +7,12 @@ import io.vertx.rxjava.core.buffer.Buffer;
 import io.vertx.rxjava.core.eventbus.MessageConsumer;
 import io.vertx.rxjava.ext.web.handler.sockjs.SockJSSocket;
 import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 import phonestats.event.UpdateDashboardEvent;
 
 import java.util.Map;
 
-@Log
+@Log4j2
 public class WebsocketHandler implements Handler<SockJSSocket> {
 	private final MongoEventStore eventStore;
 	private final Map<String, MessageConsumer<String>> consumers;
@@ -35,16 +36,16 @@ public class WebsocketHandler implements Handler<SockJSSocket> {
 					sockJSSocket.write(Buffer.buffer(message.body()));
 				}
 			});
-			log.info("bound WS handler to sessionId " + sessionId);
+			log.info("bound WS handler to sessionId {}", sessionId);
 			consumers.put(sessionId, consumer);
-			log.info("registered consumers " + consumers.size());
+			log.info("registered consumers {}", consumers.size());
 		}
 
 		sockJSSocket.endHandler(aVoid -> {
 			final MessageConsumer<String> consumer = consumers.get(sessionId);
 			consumer.unregister();
 			consumers.remove(sessionId);
-			log.info("unregistered consumer for sessionId " + sessionId);
+			log.info("unregistered consumer for sessionId {}", sessionId);
 		});
 	}
 }
