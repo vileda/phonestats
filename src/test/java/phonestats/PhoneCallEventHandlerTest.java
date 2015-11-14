@@ -57,7 +57,7 @@ public class PhoneCallEventHandlerTest {
 	public void testGetDashboardAggregate() throws Exception {
 		String userId = UUID.randomUUID().toString();
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			String callId = UUID.randomUUID().toString();
 			postCallEvent(callId, userId);
 		}
@@ -67,7 +67,7 @@ public class PhoneCallEventHandlerTest {
 		assertThat(actual, execute.getStatusLine().getStatusCode(), is(200));
 		final JsonObject jsonObject = new JsonObject(actual);
 		assertThat(actual, jsonObject.getString("id"), is(userId));
-		assertTrue(actual, jsonObject.getInteger("incomingTotal") > 0);
+		assertThat(actual, jsonObject.getInteger("incomingTotal"), is(100));
 	}
 
 	private HttpResponse post(String path, List<NameValuePair> params) throws IOException {
