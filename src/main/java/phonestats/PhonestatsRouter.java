@@ -20,16 +20,21 @@ import io.vertx.rxjava.ext.web.handler.StaticHandler;
 import io.vertx.rxjava.ext.web.handler.sockjs.SockJSHandler;
 import io.vertx.rxjava.ext.web.sstore.LocalSessionStore;
 import io.vertx.rxjava.ext.web.sstore.SessionStore;
+import org.apache.commons.lang3.Validate;
 import rx.Observable;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.lang3.Validate.notEmpty;
+
 public class PhonestatsRouter extends AbstractVerticle {
 	public void start() {
 		final EventBus eventBus = vertx.eventBus();
+		final Configuration configuration = new Configuration();
+		String mongo_url = notEmpty(configuration.getString("MONGO_URL"));
 		final JsonObject config = new JsonObject()
-				.put("connection_string", "mongodb://172.31.15.146:27017");
+				.put("connection_string", mongo_url);
 		final MongoEventStore eventStore = new MongoEventStore(vertx, eventBus, config);
 
 		final SessionStore sessionStore = LocalSessionStore.create(vertx);
